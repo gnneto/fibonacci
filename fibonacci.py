@@ -1,24 +1,22 @@
-# O script verifica se o número escolhido pelo usuário, ou um número fixo colocado diretamente no código, pertence ou não a sequência de Fibonacci.
+import requests
+import pandas as pd
 
-# usr = int(input('Digite um numero: '))
-def fibonacci(n):
-    a, b = 0, 1
-    while b < n:
-        a, b = b, a+b
-    if b == n:
-        return True
-    else:
-        return False
+respostas = []
 
-def sequencia(n):
-    fib = [0, 1]
-    while fib[-1] < n:
-        fib.append(fib[-1] + fib[-2])
-    if n in fib:
-        print(f"O numero {n} PERTENCE a sequência de Fibonacci.")
-    else:
-        print(f"O numero {n} NAO pertence a sequência de Fibonacci.")
+with open('arquivo.txt', 'r') as arquivo:
+    for linha in arquivo:
+        ca = linha.strip()
+        try:
+            xyz = requests.get(f'https://projeto-ca-api.rj.r.appspot.com/api/ca/{ca}')
+            
+            resp = xyz.json()
+            respostas.append(resp)
+            print(f"CA: {resp['CA']}  |  Equipamento: {resp['Equipamento']}  |  Situacao: {resp['Situacao']}  |  Validade: {resp['Validade']}")
+        except:
+            print(f'ERRO CA --> {ca}')
 
-# Para colocar a entrada do usuario, comente a linha 24 e tire o comentario das linhas 3 e 23
-# sequencia(usr)
-sequencia(4)
+df = pd.DataFrame(respostas)
+
+colunas = ['CA', 'Equipamento', 'Situacao', 'Validade']
+
+df[colunas].to_excel('respostas.xlsx', index=False)
